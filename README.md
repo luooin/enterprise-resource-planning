@@ -36,10 +36,12 @@
 
 **管理员**
 
+![GIF 2024-7-15 17-49-35](https://github.com/user-attachments/assets/eb2e0b06-b9c8-4730-96f4-331d0624ceea)
 
 
 **普通账号**
 
+![GIF 2024-7-15 20-49-19](https://github.com/user-attachments/assets/e3b5cc93-c2a1-4c5b-87f6-35fe2debeb19)
 
 
 #### 参与贡献🌞
