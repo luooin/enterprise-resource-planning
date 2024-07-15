@@ -1,4 +1,4 @@
-# enterprise_resource_planning🎂
+# enterprise-resource-planning🎂
 基于SpringBoot+Thymeleaf的ERP进销存仓储平台
 
 #### 介绍🌞
