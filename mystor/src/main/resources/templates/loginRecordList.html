@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>日志查看</title>
+    <style>
+        .newtitle {
+            PADDING-LEFT: 15px;
+            BACKGROUND: url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAARCAAdAAEDAREAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAABggK/8QAHxAAAQMDBQAAAAAAAAAAAAAAAQAUUgIXkVaBpdXw/8QAFgEBAQEAAAAAAAAAAAAAAAAABQMG/8QAIhEAAQIEBwEAAAAAAAAAAAAAAAETAmGR8BEVVHGBk+PR/9oADAMBAAIRAxEAPwDfW6Eh7ZWalFfBF2cN8hV6ZHCUZhvH6HPbUUHvTI4S7O1VC3VnUmy9dWm+YHVLXZCmpTo9TJ58umXv8j//2Q==');
+            PADDING-BOTTOM: 4px;
+            BORDER-LEFT: #c0dcf2 1px solid;
+        }
+    </style>
+    <th:block th:include="common.html :: source"></th:block>
+    <script type="text/javascript">
+        $(function () {
+            var pager = $(".easyui-datagrid").datagrid('getPager');
+            $(pager).pagination({
+                total:parseInt($("#total").val()),
+                pageSize:parseInt($("#size").val()),
+                pageNumber:parseInt($("#current").val()),
+                afterPageText: '页，共{pages}页',
+                pageList: [1, 5, 10, 30, 50, 100],
+                onBeforeRefresh: function (current, size) {
+                    location.href = "/loginRecord/list?current=" + current + "&size=" + size;
+                },
+                onSelectPage: function (current, size) {
+                    location.href = "/loginRecord/list?current=" + current + "&size=" + size;
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<input type="hidden" id="total" th:value="${page.total}"/>
+<input type="hidden" id="size" th:value="${page.size}"/>
+<input type="hidden" id="current" th:value="${page.current}"/>
+<table  class="easyui-datagrid" id="changesize" style="width: auto;height: 550px;" pagination="true" singleSelect="true" >
+    <thead>
+    <tr>
+        <th align="center" width="60px;" field="loginRecordId">编号</th>
+        <th align="center" width="160px;" field="employeeId">用户ID</th>
+        <th align="center" width="160px;" field="employeeName">用户姓名</th>
+        <th align="center" width="160px;" field="ipaddress">IP地址</th>
+        <th align="center" width="160px;" field="time">操作时间</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="loginRecord:${page.data}">
+        <td th:text="${loginRecord.loginRecordId}"></td>
+        <td th:text="${loginRecord.employeeId}"></td>
+        <td th:text="${loginRecord.employeeName}"></td>
+        <td th:text="${loginRecord.ipaddress}"></td>
+        <td th:text="${loginRecord.time}"></td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

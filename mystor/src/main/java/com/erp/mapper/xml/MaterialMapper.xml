@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.erp.mapper.MaterialMapper">
+
+    <select id="list" resultType="MaterialVO">
+        select material_id,material_code,material_name,style,remark,material_unit,bag_unit,m.material_type_id,m.prod_type_id,m.formula,material_type_code,material_type_name,prod_type_code,prod_type_name from material m,material_type mt,prod_type pt where m.material_type_id = mt.material_type_id and m.prod_type_id = pt.prod_type_id limit #{param1},#{param2}
+    </select>
+
+    <select id="count" resultType="java.lang.Long">
+        select count(*) from material m,material_type mt,prod_type pt where m.material_type_id = mt.material_type_id and m.prod_type_id = pt.prod_type_id
+    </select>
+
+
+</mapper>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.erp.mapper.RoleEmployeeMapper">
+
+    <select id="interceptorAuthorityList" resultType="InterceptorAuthorityVO">
+        select a.authority_name,a.controller from role_employee re,role_authority ra,authority a where re.role_id = ra.role_id and ra.authority_id = a.authority_id and re.employee_id = #{employeeId}
+    </select>
+</mapper>

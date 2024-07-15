@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.erp.mapper.OrdersMapper">
+<!--<select id="ordersVOList" resultType="OrdersVO">-->
+<!--              select o.order_type,o.order_no,s.supplier_name,o.employee_name,o.order_date,o.invalid,o.status,od.material_code,od.material_name,od.batch_no,od.style,od.storage_name,od.unit_name,od.order_count,od.order_flag,o.verify_person,o.verify_date from orders o,order_detail od,supplier s-->
+<!--            -->
+<!--              where o.order_no = od.order_no and o.supplier_id = s.supplier_id limit #{param1},#{param2}-->
+
+<!--</select>-->
+    <select id="ordersReturnVOList" resultType="OrdersVO">
+        select o.order_type,o.order_no,s.supplier_name,o.employee_name,o.order_date,o.invalid,o.status,od.material_code,od.material_name,od.batch_no,od.style,od.storage_name,od.unit_name,od.order_count,od.order_flag,o.verify_person,o.verify_date from orders o,order_detail od,supplier s
+        <where>
+            o.order_type = 2 and o.order_no = od.order_no and o.supplier_id = s.supplier_id
+            <if test="param3.supplierId != null and param3.supplierId != ''">
+                and o.supplier_id = #{param3.supplierId}
+            </if>
+            <if test="param3.invalid != null">
+                and o.invalid = #{param3.invalid}
+            </if>
+            <if test="param3.status != null">
+                and o.status = #{param3.status}
+            </if>
+            <if test="param3.employeeName != null and param3.employeeName != ''">
+                and o.employee_name like concat('%',#{param3.employeeName},'%')
+            </if>
+            <if test="param3.orderDate1 != null and param3.orderDate1 != '' and param3.orderDate2 != null and param3.orderDate2 != ''">
+                and o.order_date between #{param3.orderDate1} and #{param3.orderDate2}
+            </if>
+        </where>
+        limit #{param1},#{param2}
+    </select>
+
+    <select id="ordersVOList" resultType="OrdersVO">
+        select o.order_type,o.order_no,s.supplier_name,o.employee_name,o.order_date,o.invalid,o.status,od.material_code,od.material_name,od.batch_no,od.style,od.storage_name,od.unit_name,od.order_count,od.order_flag,o.verify_person,o.verify_date from orders o,order_detail od,supplier s
+        <where>
+            o.order_type = 1 and o.order_no = od.order_no and o.supplier_id = s.supplier_id
+            <if test="param3.supplierId != null and param3.supplierId != ''">
+                and o.supplier_id = #{param3.supplierId}
+            </if>
+            <if test="param3.invalid != null">
+                and o.invalid = #{param3.invalid}
+            </if>
+            <if test="param3.status != null">
+                and o.status = #{param3.status}
+            </if>
+            <if test="param3.employeeName != null and param3.employeeName != ''">
+                and o.employee_name like concat('%',#{param3.employeeName},'%')
+            </if>
+            <if test="param3.orderDate1 != null and param3.orderDate1 != '' and param3.orderDate2 != null and param3.orderDate2 != ''">
+                and o.order_date between #{param3.orderDate1} and #{param3.orderDate2}
+            </if>
+        </where>
+        limit #{param1},#{param2}
+    </select>
+
+    <select id="ordersVOCount" resultType="java.lang.Long">
+        select count(*) from orders o,order_detail od,supplier s
+        <where>
+            o.order_type = 1 and o.order_no = od.order_no and o.supplier_id = s.supplier_id
+            <if test="supplierId != null and supplierId != ''">
+                and o.supplier_id = #{supplierId}
+            </if>
+            <if test="invalid != null">
+                and o.invalid = #{invalid}
+            </if>
+            <if test="status != null">
+                and o.status = #{status}
+            </if>
+            <if test="employeeName != null and employeeName != ''">
+                and o.employee_name like concat('%',#{employeeName},'%')
+            </if>
+            <if test="orderDate1 != null and orderDate1 != '' and orderDate2 != null and orderDate2 != ''">
+                and o.order_date between #{orderDate1} and #{orderDate2}
+            </if>
+        </where>
+    </select>
+
+    <select id="ordersReturnVOCount" resultType="java.lang.Long">
+        select count(*) from orders o,order_detail od,supplier s
+        <where>
+            o.order_type = 2 and o.order_no = od.order_no and o.supplier_id = s.supplier_id
+            <if test="supplierId != null and supplierId != ''">
+                and o.supplier_id = #{supplierId}
+            </if>
+            <if test="invalid != null">
+                and o.invalid = #{invalid}
+            </if>
+            <if test="status != null">
+                and o.status = #{status}
+            </if>
+            <if test="employeeName != null and employeeName != ''">
+                and o.employee_name like concat('%',#{employeeName},'%')
+            </if>
+            <if test="orderDate1 != null and orderDate1 != '' and orderDate2 != null and orderDate2 != ''">
+                and o.order_date between #{orderDate1} and #{orderDate2}
+            </if>
+        </where>
+    </select>
+
+
+    <delete id="batchDelete">
+        delete from orders
+        <where>
+            <foreach collection="orderNos" open="order_no in (" close=")" item="orderNo" separator=",">
+                #{orderNo}
+            </foreach>
+        </where>
+    </delete>
+
+
+    <update id="batchVerify">
+        update orders set status = 1
+        <where>
+            <foreach collection="orderNos" open="order_no in (" close=")" item="orderNo" separator=",">
+                #{orderNo}
+            </foreach>
+        </where>
+    </update>
+    <update id="batchInvalid">
+        update orders set invalid = 0
+        <where>
+            <foreach collection="orderNos" open="order_no in (" close=")" item="orderNo" separator=",">
+                #{orderNo}
+            </foreach>
+        </where>
+    </update>
+
+    <select id="saleVOList" resultType="OrdersVO">
+        select o.order_type,o.order_no,s.supplier_name,o.employee_name,o.order_date,o.invalid,o.status,od.material_code,od.material_name,od.batch_no,od.style,od.storage_name,od.unit_name,od.order_count,od.order_flag,o.verify_person,o.verify_date from orders o,order_detail od,supplier s
+        <where>
+            o.order_type = 3 and o.order_no = od.order_no and o.supplier_id = s.supplier_id
+            <if test="param3.supplierId != null and param3.supplierId != ''">
+                and o.supplier_id = #{param3.supplierId}
+            </if>
+            <if test="param3.invalid != null">
+                and o.invalid = #{param3.invalid}
+            </if>
+            <if test="param3.status != null">
+                and o.status = #{param3.status}
+            </if>
+            <if test="param3.employeeName != null and param3.employeeName != ''">
+                and o.employee_name like concat('%',#{param3.employeeName},'%')
+            </if>
+            <if test="param3.orderDate1 != null and param3.orderDate1 != '' and param3.orderDate2 != null and param3.orderDate2 != ''">
+                and o.order_date between #{param3.orderDate1} and #{param3.orderDate2}
+            </if>
+        </where>
+        limit #{param1},#{param2}
+    </select>
+
+    <select id="saleVOCount" resultType="java.lang.Long">
+        select count(*) from orders o,order_detail od,supplier s
+        <where>
+            o.order_type = 3 and o.order_no = od.order_no and o.supplier_id = s.supplier_id
+            <if test="supplierId != null and supplierId != ''">
+                and o.supplier_id = #{supplierId}
+            </if>
+            <if test="invalid != null">
+                and o.invalid = #{invalid}
+            </if>
+            <if test="status != null">
+                and o.status = #{status}
+            </if>
+            <if test="employeeName != null and employeeName != ''">
+                and o.employee_name like concat('%',#{employeeName},'%')
+            </if>
+            <if test="orderDate1 != null and orderDate1 != '' and orderDate2 != null and orderDate2 != ''">
+                and o.order_date between #{orderDate1} and #{orderDate2}
+            </if>
+        </where>
+    </select>
+
+    <select id="saleReturnVOList" resultType="OrdersVO">
+        select o.order_type,o.order_no,s.supplier_name,o.employee_name,o.order_date,o.invalid,o.status,od.material_code,od.material_name,od.batch_no,od.style,od.storage_name,od.unit_name,od.order_count,od.order_flag,o.verify_person,o.verify_date from orders o,order_detail od,supplier s
+        <where>
+            o.order_type = 4 and o.order_no = od.order_no and o.supplier_id = s.supplier_id
+            <if test="param3.supplierId != null and param3.supplierId != ''">
+                and o.supplier_id = #{param3.supplierId}
+            </if>
+            <if test="param3.invalid != null">
+                and o.invalid = #{param3.invalid}
+            </if>
+            <if test="param3.status != null">
+                and o.status = #{param3.status}
+            </if>
+            <if test="param3.employeeName != null and param3.employeeName != ''">
+                and o.employee_name like concat('%',#{param3.employeeName},'%')
+            </if>
+            <if test="param3.orderDate1 != null and param3.orderDate1 != '' and param3.orderDate2 != null and param3.orderDate2 != ''">
+                and o.order_date between #{param3.orderDate1} and #{param3.orderDate2}
+            </if>
+        </where>
+        limit #{param1},#{param2}
+    </select>
+
+    <select id="saleReturnVOCount" resultType="java.lang.Long">
+        select count(*) from orders o,order_detail od,supplier s
+        <where>
+            o.order_type = 4 and o.order_no = od.order_no and o.supplier_id = s.supplier_id
+            <if test="supplierId != null and supplierId != ''">
+                and o.supplier_id = #{supplierId}
+            </if>
+            <if test="invalid != null">
+                and o.invalid = #{invalid}
+            </if>
+            <if test="status != null">
+                and o.status = #{status}
+            </if>
+            <if test="employeeName != null and employeeName != ''">
+                and o.employee_name like concat('%',#{employeeName},'%')
+            </if>
+            <if test="orderDate1 != null and orderDate1 != '' and orderDate2 != null and orderDate2 != ''">
+                and o.order_date between #{orderDate1} and #{orderDate2}
+            </if>
+        </where>
+    </select>
+
+    <select id="reportList" resultType="ReportVO">
+        select o.order_no,o.order_type,s.supplier_name,o.employee_name,o.order_date,od.material_code,od.material_name,od.batch_no,od.order_id,od.storage_name,od.order_count,od.order_flag from orders o,order_detail od,supplier s
+        <where>
+            o.order_no = od.order_no and s.supplier_id = o.supplier_id
+            <if test="param3.storageId != null and param3.storageId != ''">
+                and od.storage_id = #{param3.storageId}
+            </if>
+            <if test="param3.orderType != null and param3.orderType != ''">
+                and o.order_type = #{param3.orderType}
+            </if>
+            <if test="param3.materialName != null and param3.materialName != ''">
+                and od.material_name like concat('%',#{param3.materialName},'%')
+            </if>
+            <if test="param3.orderDate1 != null and param3.orderDate1 != '' and param3.orderDate2 != null and param3.orderDate2 != ''">
+                and o.order_date between #{param3.orderDate1} and #{param3.orderDate2}
+            </if>
+        </where>
+        limit #{param1},#{param2}
+    </select>
+
+
+    <select id="reportCount" resultType="java.lang.Long">
+        select count(*) from orders o,order_detail od,supplier s
+        <where>
+            o.order_no = od.order_no and s.supplier_id = o.supplier_id
+            <if test="storageId != null and storageId != ''">
+                and od.storage_id = #{storageId}
+            </if>
+            <if test="orderType != null and orderType != ''">
+                and o.order_type = #{orderType}
+            </if>
+            <if test="materialName != null and materialName != ''">
+                and od.material_name like concat('%',#{materialName},'%')
+            </if>
+            <if test="orderDate1 != null and orderDate1 != '' and orderDate2 != null and orderDate2 != ''">
+                and o.order_date between #{orderDate1} and #{orderDate2}
+            </if>
+        </where>
+    </select>
+
+    <select id="reportExportList" resultType="ReportVO">
+        select o.order_no,o.order_type,s.supplier_name,o.employee_name,o.order_date,od.material_code,od.material_name,od.batch_no,od.order_id,od.storage_name,od.order_count,od.order_flag from orders o,order_detail od,supplier s
+        <where>
+            o.order_no = od.order_no and s.supplier_id = o.supplier_id
+        </where>
+    </select>
+</mapper>

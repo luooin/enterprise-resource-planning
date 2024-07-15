@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>ERP进销存仓储平台</title>
+    <link rel="shortcut icon" href="/static/images/favicon.ico"/>
+    <link href="/static/login/login.css" rel="stylesheet">
+    <script type="text/javascript" src="/static/js/jquery-easyui-1.3.0/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript">
+        //刷新验证码
+        function refresh() {
+            document.getElementById("randImage").src = '/login/enimg?' + Math.random();
+        }
+
+        //给body监听keydown事件，实现按回车登录，调用登录方法
+        function btnlogin() {
+            if (event.keyCode == 13) {
+                loginSubmit();
+            }
+        }
+
+        //提交登录
+        function loginSubmit() {
+            if ($("#phone").val() == "") {
+                $("#errorMsg").html('手机号不能为空！');
+                $("#phone").focus();
+                return false;
+            }
+            if ($("#password").val() == "") {
+                $("#errorMsg").html('密码不能为空！');
+                $("#password").focus();
+                return false;
+            }
+            if ($("#code").val() == "") {
+                $("#errorMsg").html('验证码不能为空！');
+                $("#code").focus();
+                return false;
+            }
+            var form = document.getElementById('form1');
+            form.submit();
+        }
+    </script>
+</head>
+<body onkeydown="btnlogin()">
+<div class="login_b">
+    <div class="header">
+        <!--        <div class="header_logo"><img src="/static/images/logo.png" width="140" height="47"></div>-->
+        <p class="header_con">ERP进销存仓储平台</p>
+    </div>
+    <div class="lgn_bx">
+        <div class="login_con">
+            <div class="lgn_con">
+                <div class="login_con_bx">
+                    <div class="login_tit">用户登录</div>
+                    <div>
+                        <ul class="login_con_bx_bl">
+                            <div id="msg" class="alert alert-error" style="color: red;font-size: 12px;">
+                                <span id="errorMsg" th:text="${errorMsg}"></span>
+                            </div>
+                            <form id="form1" method="post" action="/login/verify" target="_top">
+                                <li style="cursor: hand">
+                                    <span style="cursor: hand"><img
+                                            src="/static/images/login_icon02.png"/></span>
+                                    <div class="lgtel">
+                                        <input type="text" placeholder="请输入手机号" value="admin" id="phone"
+                                               name="phone"
+                                               class="telbt"/>
+                                    </div>
+                                </li>
+                                <li>
+                                    <span><img src="/static/images/login_icon01.png"/></span>
+                                    <div class="lgtel">
+                                        <input type="password" id="password" value="123456" name="password"
+                                               placeholder="请输入密码" class="telbt"/>
+                                    </div>
+                                </li>
+                                <li style="border:none">
+                                    <div class="lgtel" style="width:50%;border:1px solid #B7B7B7;">
+                                        <input type="text" name="code" id="code" value="8888"
+                                               placeholder="  请输入验证码"
+                                               class="telbt" style="width:120px;" title="按回车键登录">
+                                    </div>
+
+                                    <div class="rzm_btn">
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="/login/enimg" onclick="refresh()"
+                                                                           width="70" height="42" id="randImage"
+                                                                           align="top" alt="点击换一张">
+                                    </div>
+                                </li>
+                                <li style="border:none; background:none">
+                                    <a class="login_btn" href="javascript:void(0);" onclick="loginSubmit()"
+                                       title="按回车键登录">登录</a>
+                                </li>
+                            </form>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+    </div>
+</div>
+</body>
+</html>

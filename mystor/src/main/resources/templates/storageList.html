@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>仓库管理</title>
+    <style>
+        .newtitle {
+            PADDING-LEFT: 15px;
+            BACKGROUND: url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAARCAAdAAEDAREAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAABggK/8QAHxAAAQMDBQAAAAAAAAAAAAAAAQAUUgIXkVaBpdXw/8QAFgEBAQEAAAAAAAAAAAAAAAAABQMG/8QAIhEAAQIEBwEAAAAAAAAAAAAAAAETAmGR8BEVVHGBk+PR/9oADAMBAAIRAxEAPwDfW6Eh7ZWalFfBF2cN8hV6ZHCUZhvH6HPbUUHvTI4S7O1VC3VnUmy9dWm+YHVLXZCmpTo9TJ58umXv8j//2Q==');
+            PADDING-BOTTOM: 4px;
+            BORDER-LEFT: #c0dcf2 1px solid;
+        }
+    </style>
+    <th:block th:include="common.html :: source"></th:block>
+    <script type="text/javascript">
+        $(function () {
+            var pager = $(".easyui-datagrid").datagrid('getPager');
+            $(pager).pagination({
+                total:parseInt($("#total").val()),
+                pageSize:parseInt($("#size").val()),
+                pageNumber:parseInt($("#current").val()),
+                afterPageText: '页，共{pages}页',
+                pageList: [1, 5, 10, 20, 30, 50],
+                //刷新方法
+                onBeforeRefresh: function (current, size) {
+                    location.href = "/storage/list?current=" + current + "&size=" + size;
+                },
+                onSelectPage: function (current, size) {
+                    location.href = "/storage/list?current=" + current + "&size=" + size;
+                }
+            });
+        });
+
+        function click(value, res) {
+            $("#storageId").val(res.storageId);
+            $("#storageCode").val(res.storageCode);
+            $("#storageName").val(res.storageName);
+            $("#chairman").val(res.chairman);
+            $("#phone").val(res.phone);
+            $("#position").val(res.position);
+        }
+
+        //新增
+        function reset() {
+            $("#storageId").val('');
+            $("#storageCode").val('');
+            $("#storageName").val('');
+            $("#chairman").val('');
+            $("#phone").val('');
+            $("#position").val('');
+        }
+
+        function save() {
+            if($("#storageCode").val()==""){
+                $.messager.alert("操作提示", "请输入仓库代码","error",function () {
+                    $("#storageCode").focus();
+                });
+                return false;
+            }
+            if($("#storageName").val()==""){
+                $.messager.alert("操作提示", "请输入仓库名称","error",function () {
+                    $("#storageName").focus();
+                });
+                return false;
+            }
+            $.post(
+                "/storage/save",
+                {
+                    "storageId": $("#storageId").val(),
+                    "storageCode": $("#storageCode").val(),
+                    "storageName": $("#storageName").val(),
+                    "chairman":$("#chairman").val(),
+                    "phone":$("#phone").val(),
+                    "position":$("#position").val()
+                },
+                function (data) {
+                    if(data == "success"){
+                        $.messager.alert("操作提示", "保存成功！","info",function () {
+                            window.location.href = "/storage/list";
+                        });
+                    }else{
+                        $.messager.alert("操作提示", "仓库代码【"+$("#storageCode").val()+"】已存在，请重新输入！","error",function () {
+                            $("#storageCode").focus();
+                        });
+                        return false;
+                    }
+                }
+            )
+        }
+
+        function del(id){
+            $.messager.confirm('提示','确定删除？',function(res){
+                if(res){
+                    $.post(
+                        "/storage/delete?id="+id,
+                        function (data) {
+                            if(data == "success"){
+                                $.messager.alert("操作提示", "删除成功！","info",function () {
+                                    window.location.href = "/storage/list";
+                                });
+                            }else{
+                                $.messager.alert("操作提示", "删除失败！","error");
+                            }
+                        }
+                    );
+                }
+            })
+        }
+    </script>
+</head>
+<body>
+<input type="hidden" id="current" th:value="${page.current}"/>
+<input type="hidden" id="size" th:value="${page.size}"/>
+<input type="hidden" id="total" th:value="${page.total}">
+<table class="easyui-datagrid" pagination="true" fitColumns="true" style="height:400px" singleSelect="true"
+       data-options="onClickRow:click">
+    <thead>
+    <tr>
+        <th align="center" width="100" field="storageId">编号</th>
+        <th align="center" width="200" field="storageCode">仓库代码</th>
+        <th align="center" width="200" field="storageName">仓库名称</th>
+        <th align="center" width="200" field="chairman">负责人</th>
+        <th align="center" width="200" field="phone">联系电话</th>
+        <th align="center" width="200" field="position">仓库位置</th>
+        <th align="center" width="200" field="opt">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="storage:${page.data}">
+        <td th:text="${storage.storageId}"></td>
+        <td th:text="${storage.storageCode}"></td>
+        <td th:text="${storage.storageName}"></td>
+        <td th:text="${storage.chairman}"></td>
+        <td th:text="${storage.phone}"></td>
+        <td th:text="${storage.position}"></td>
+        <td>
+            <a href="javascript:void(0)" class="easyui-linkbutton" plain="true" icon="icon-remove"  th:onclick="'del('+${storage.storageId}+')'"> 删除</a>
+            <a href='javascript:void(0)' class="easyui-linkbutton" plain="true" icon="icon-edit" onclick='click()'>编辑</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<div id="tt" class="easyui-tabs" style="height:150px">
+    <div title="仓库信息管理" data-options="closable:false,cache:false" style="padding:0px;">
+        <div class="newtitle">
+            <th>
+                <a class="easyui-linkbutton " href="javascript:void(0);" plain="true" icon="icon-add" onclick="reset()">新增</a>
+                <a class="easyui-linkbutton" plain="true" icon="icon-save" href="javascript:void(0);"
+                   onclick="save()">保存</a>
+            </th>
+        </div>
+        <form name="form1" enctype="multipart/form-data" method="post">
+            <input id="storageId" name="storageId" type="hidden"></input>
+            <table width="100%" align="center" style="margin-top: 5px;">
+                <tr height="40px">
+                    <td align="right">仓库代码：</td>
+                    <td>
+                        <input class="easyui-textbox" id="storageCode" name="storageCode"
+                               data-options="prompt:'请输入仓库代码',validType:'text'"><font color="red">必须唯一</font>
+                    </td>
+                    <td align="right">仓库名称：</td>
+                    <td>
+                        <input class="easyui-textbox" id="storageName" name="storageName"
+                               data-options="prompt:'请输入仓库名称',validType:'text'">
+                    </td>
+                    <td align="right">负责人：</td>
+                    <td>
+                        <input class="easyui-textbox" id="chairman" name="chairman"
+                               data-options="prompt:'请输入仓库负责人',validType:'text'">
+                    </td>
+                </tr>
+                <tr height="40px">
+                    <td align="right">联系电话：</td>
+                    <td>
+                        <input class="easyui-textbox" id="phone" name="phone"
+                               data-options="prompt:'请输入联系电话',validType:'text'">
+                    </td>
+                    <td align="right">仓库位置：</td>
+                    <td colspan="3">
+                        <input class="easyui-textbox" id="position" name="position"
+                               data-options="prompt:'请输入仓库位置',validType:'text'" style="width:600px">
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+</body>
+</html>

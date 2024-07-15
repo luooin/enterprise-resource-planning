@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.erp.mapper.EmployeeMapper">
+    <select id="list" resultType="com.erp.vo.EmployeeVO">
+        select employee_id,employee_name,department_name,sex,phone,address,status from employee e,department d
+        <where>
+            e.department_id = d.department_id
+            <if test="param3.departmentId != null and param3.departmentId != ''">
+                and e.department_id = #{param3.departmentId}
+            </if>
+            <if test="param3.employeeName != null and param3.employeeName != ''">
+                and employee_name like concat('%',#{param3.employeeName},'%')
+            </if>
+            <if test="param3.phone != null and param3.phone != ''">
+                and phone = #{param3.phone}
+            </if>
+            <if test="param3.status != null">
+                and status = #{param3.status}
+            </if>
+        </where>
+        limit #{param1},#{param2}
+    </select>
+
+    <select id="count" resultType="java.lang.Long">
+        select count(*) from employee e,department d
+        <where>
+            e.department_id = d.department_id
+            <if test="departmentId != null and departmentId != ''">
+                and e.department_id = #{departmentId}
+            </if>
+            <if test="employeeName != null and employeeName != ''">
+                and employee_name like concat('%',#{employeeName},'%')
+            </if>
+            <if test="phone != null and phone != ''">
+                and phone = #{phone}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
+    <update id="setStatus">
+        update employee set status=#{param1} where employee_id=#{param2}
+    </update>
+    <update id="resetPassword">
+        update employee set password=#{param1} where employee_id=#{param2}
+    </update>
+</mapper>

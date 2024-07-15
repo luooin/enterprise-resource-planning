@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.erp.mapper.AuthorityMapper">
+
+    <select id="list" resultType="AuthorityVO">
+        select a1.authority_id,a1.authority_name,a1.root,a2.authority_id 'authority.authority_id',a2.authority_name 'authority.authority_name' from authority a1 left join authority a2 on a1.root = a2.authority_id
+    </select>
+</mapper>

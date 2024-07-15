@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.erp.mapper.StorageMapper">
+
+    <select id="findByUser" parameterType="com.erp.entity.Storage" resultType="com.erp.entity.Storage">
+        select * from storage
+        <where>
+            <foreach collection="ids" open="storage_id in (" close=")" item="id" separator=",">
+                #{id}
+            </foreach>
+        </where>
+    </select>
+</mapper>

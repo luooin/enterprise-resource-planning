@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>供应商管理</title>
+    <style>
+        .newtitle {
+            PADDING-LEFT: 15px;
+            BACKGROUND: url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAARCAAdAAEDAREAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAABggK/8QAHxAAAQMDBQAAAAAAAAAAAAAAAQAUUgIXkVaBpdXw/8QAFgEBAQEAAAAAAAAAAAAAAAAABQMG/8QAIhEAAQIEBwEAAAAAAAAAAAAAAAETAmGR8BEVVHGBk+PR/9oADAMBAAIRAxEAPwDfW6Eh7ZWalFfBF2cN8hV6ZHCUZhvH6HPbUUHvTI4S7O1VC3VnUmy9dWm+YHVLXZCmpTo9TJ58umXv8j//2Q==');
+            PADDING-BOTTOM: 4px;
+            BORDER-LEFT: #c0dcf2 1px solid;
+        }
+    </style>
+    <th:block th:include="common.html :: source"></th:block>
+    <script type="text/javascript">
+        $(function () {
+            var pager = $(".easyui-datagrid").datagrid('getPager');
+            $(pager).pagination({
+                total:parseInt($("#total").val()),
+                pageSize:parseInt($("#size").val()),
+                pageNumber:parseInt($("#current").val()),
+                afterPageText: '页，共{pages}页',
+                pageList: [1, 5, 10, 20, 30, 50],
+                //刷新方法
+                onBeforeRefresh: function (current, size) {
+                    location.href = "/supplier/list?current=" + current + "&size=" + size;
+                },
+                onSelectPage: function (current, size) {
+                    location.href = "/supplier/list?current=" + current + "&size=" + size;
+                }
+            });
+        });
+
+        function del(supplierId) {
+
+            $.messager.confirm('提示','确定删除？',function(res){
+                if(res){
+                    $.post(
+                        "/supplier/delete?id="+supplierId,
+                        function (data) {
+                            if(data == "success"){
+                                $.messager.alert("操作提示", "删除成功！","info",function () {
+                                    window.location.href = "/supplier/list";
+                                });
+                            }else{
+                                $.messager.alert("操作提示", "删除失败！","error");
+                            }
+                        }
+                    );
+                }
+            })
+        }
+
+        function save() {
+            if ($("#supplierCode").val()==""){
+                $.messager.alert("操作提示", "请输入供应商编码","error",function () {
+                    $("#supplierCode").focus();
+                });
+                return false;
+            }
+            if ($("#supplierName").val()==""){
+                $.messager.alert("操作提示", "请输入供应商名称","error",function () {
+                    $("#supplierName").focus();
+                });
+                return false;
+            }
+            $.post(
+                "/supplier/save",
+                {
+                    "supplierId":$("#supplierId").val(),
+                    "supplierName":$("#supplierName").val(),
+                    "supplierCode":$("#supplierCode").val(),
+                    "address":$("#address").val(),
+                    "country":$("#country").val(),
+                    "province":$("#province").val(),
+                    "city":$("#city").val(),
+                    "contact":$("#contact").val(),
+                    "email":$("#email").val(),
+                    "phone":$("#phone").val(),
+                    "taxId":$("#taxId").val(),
+                    "bankName":$("#bankName").val(),
+                    "bankAccount":$("#bankAccount").val(),
+                    "bankChairman":$("#bankChairman").val(),
+                    "remark":$("#remark").val()
+                },
+                function(data){
+
+                    if(data == "success"){
+                        $.messager.alert("操作提示", "保存成功！","info",function () {
+                            window.location.href = "/supplier/list";
+                        });
+                    }else{
+                        $.messager.alert("操作提示", "供应商编码【"+$("#supplierCode").val()+"】已存在，请重新输入！","error",function () {
+                            $("#supplierCode").focus();
+                        });
+                        return false;
+                    }
+                }
+            );
+        }
+
+        function click(value, res) {
+            $("#supplierId").val(res.supplierId);
+            $("#supplierName").val(res.supplierName);
+            $("#supplierCode").val(res.supplierCode);
+            $("#address").val(res.address);
+            $("#country").val(res.country);
+            $("#province").val(res.province);
+            $("#city").val(res.city);
+            $("#contact").val(res.contact);
+            $("#email").val(res.email);
+            $("#phone").val(res.phone);
+            $("#taxId").val(res.taxId);
+            $("#bankName").val(res.bankName);
+            $("#bankAccount").val(res.bankAccount);
+            $("#bankChairman").val(res.bankChairman);
+            $("#remark").val(res.remark);
+        }
+
+        function reset() {
+            $("#supplierId").val("");
+            $("#supplierName").val("");
+            $("#supplierCode").val("");
+            $("#address").val("");
+            $("#country").val("");
+            $("#province").val("");
+            $("#city").val("");
+            $("#contact").val("");
+            $("#email").val("");
+            $("#phone").val("");
+            $("#taxId").val("");
+            $("#bankName").val("");
+            $("#bankAccount").val("");
+            $("#bankChairman").val("");
+            $("#remark").val("");
+        }
+
+    </script>
+</head>
+<body>
+<input type="hidden" id="total" th:value="${page.total}"/>
+<input type="hidden" id="current" th:value="${page.current}"/>
+<input type="hidden" id="size" th:value="${page.size}"/>
+<table  class="easyui-datagrid" pagination="true" fitColumns="auto"  style="height:300px" singleSelect="true" data-options="onClickRow:click">
+    <thead>
+    <tr>
+        <th align="center" width="80" field="supplierId">序号</th>
+        <th align="center" width="100" field="supplierCode">供应商编码</th>
+        <th align="center" width="100" field="supplierName">供应商名称</th>
+        <th align="center" width="80" field="contact">联系人</th>
+        <th align="center" width="120" field="phone">手机</th>
+        <th align="center" width="100" field="email">邮箱</th>
+        <th align="center" width="100" field="taxId">纳税编号</th>
+        <th align="center" width="100" field="bankName">开户银行</th>
+        <th align="center" width="100" field="bankAccount">银行账号</th>
+        <th align="center" width="100" field="bankChairman">户名</th>
+        <th align="center" width="100" field="country">国家</th>
+        <th align="center" width="100" field="province">省份</th>
+        <th align="center" width="100" field="city">城市</th>
+        <th align="center" width="100" field="address">地址</th>
+        <th align="center" width="100" field="remark">备注</th>
+        <th align="center" field="opt">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="supplier:${page.data}">
+        <td th:text="${supplier.supplierId}"></td>
+        <td th:text="${supplier.supplierCode}"></td>
+        <td th:text="${supplier.supplierName}"></td>
+        <td th:text="${supplier.contact}"></td>
+        <td th:text="${supplier.phone}"></td>
+        <td th:text="${supplier.email}"></td>
+        <td th:text="${supplier.taxId}"></td>
+        <td th:text="${supplier.bankName}"></td>
+        <td th:text="${supplier.bankAccount}"></td>
+        <td th:text="${supplier.bankChairman}"></td>
+        <td th:text="${supplier.country}"></td>
+        <td th:text="${supplier.province}"></td>
+        <td th:text="${supplier.city}"></td>
+        <td th:text="${supplier.address}"></td>
+        <td th:text="${supplier.remark}"></td>
+        <td>
+            <a href="javascript:void(0);" class="easyui-linkbutton" plain="true" icon="icon-remove"
+               th:onclick="'del('+${supplier.supplierId}+')'"> 删除</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<div id="tt" class="easyui-tabs" style="height:260px">
+    <div title="供应商管理" data-options="closable:false,cache:false" style="padding:0px;">
+        <div class="newtitle">
+            <th>
+                <a class="easyui-linkbutton " href="javascript:void(0);" plain="true" icon="icon-add" onclick="reset()">新增</a>
+                <a class="easyui-linkbutton " href="javascript:void(0);" plain="true" icon="icon-save" onclick="save()">保存</a>
+            </th>
+        </div>
+        <form id="td" name="td" method="post" style="margin-left: 50px;">
+            <hidden id="supplierId" name="supplierId"></hidden>
+            <table border="0" width="100%">
+                <tr height="30">
+                    <td align="right"><label class="label-top">供应商编码:</label></td>
+                    <td><input class="easyui-textbox" data-options="required:true" id="supplierCode" name="supplierCode" style="width: 220px;">
+                        <font color="red">必须唯一</font>
+                    </td>
+                    <td align="right"><label class="label-top">供应商名称:</label></td>
+                    <td><input class="easyui-textbox" data-options="required:true" id="supplierName" name="supplierName" style="width: 220px;"></td>
+                    <td align="right"><label class="label-top">联系人:</label></td>
+                    <td><input class="easyui-textbox" data-options="required:true" id="contact" name="contact" style="width: 220px;"></td>
+                </tr>
+                <tr height="30">
+                    <td align="right"><label class="label-top">邮箱:</label></td>
+                    <td><input class="easyui-textbox" data-options="required:true" id="email" name="email" style="width: 220px;"></td>
+                    <td align="right"><label class="label-top">手机:</label></td>
+                    <td><input class="easyui-textbox" data-options="required:true" id="phone" name="phone" style="width: 220px;"></td>
+                    <td align="right"><label class="label-top">纳税编号:</label></td>
+                    <td><input class="easyui-textbox" data-options="required:true" id="taxId" name="taxId" style="width: 220px;"></td>
+                </tr>
+                <tr height="30">
+                    <td align="right"><label class="label-top">开户银行:</label></td>
+                    <td><input class="easyui-textbox" data-options="required:true" id="bankName" name="bankName" style="width: 220px;"></td>
+                    <td align="right"><label class="label-top">银行账号:</label></td>
+                    <td><input class="easyui-textbox" data-options="required:true" id="bankAccount" name="bankAccount" style="width: 220px;"></td>
+                    <td align="right"><label class="label-top">户名:</label></td>
+                    <td><input class="easyui-textbox" data-options="required:true" id="bankChairman" name="bankChairman" style="width: 220px;"></td>
+                </tr>
+                <tr height="30">
+                    <td align="right"><label class="label-top">所属国家:</label></td>
+                    <td><input class="easyui-textbox" data-options="required:true" id="country" name="country" style="width: 220px;"></td>
+                    <td align="right"><label class="label-top">省份:</label></td>
+                    <td><input class="easyui-textbox" data-options="required:true" id="province" name="province" style="width: 220px;"></td>
+                    <td align="right"><label class="label-top">城市:</label></td>
+                    <td><input class="easyui-textbox" data-options="required:true" id="city" name="city" style="width: 220px;"></td>
+                </tr>
+                <tr height="30">
+                    <td align="right"><label class="label-top">单位地址:</label></td>
+                    <td><input class="easyui-textbox" data-options="required:true" id="address" name="address" style="width: 220px;"></td>
+                </tr>
+                <tr height="40">
+                    <td align="right"><label class="label-top">供应商描述:</label></td>
+                    <td colspan="5"><input class="easyui-textbox" data-options="required:true" id="remark" name="remark" style="width: 1020px;"></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+</body>
+</html>

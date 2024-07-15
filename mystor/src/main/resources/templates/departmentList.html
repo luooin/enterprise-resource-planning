@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>部门管理</title>
+    <style>
+        .newtitle {
+            PADDING-LEFT: 15px;
+            BACKGROUND: url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAARCAAdAAEDAREAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAABggK/8QAHxAAAQMDBQAAAAAAAAAAAAAAAQAUUgIXkVaBpdXw/8QAFgEBAQEAAAAAAAAAAAAAAAAABQMG/8QAIhEAAQIEBwEAAAAAAAAAAAAAAAETAmGR8BEVVHGBk+PR/9oADAMBAAIRAxEAPwDfW6Eh7ZWalFfBF2cN8hV6ZHCUZhvH6HPbUUHvTI4S7O1VC3VnUmy9dWm+YHVLXZCmpTo9TJ58umXv8j//2Q==');
+            PADDING-BOTTOM: 4px;
+            BORDER-LEFT: #c0dcf2 1px solid;
+        }
+    </style>
+    <th:block th:include="common.html :: source"></th:block>
+    <script type="text/javascript">
+
+        function del() {
+            $.messager.confirm('提示','确定删除？',function(res){
+                if(res){
+                    let depid = $("#depid").val();
+                    if(depid == ''){
+                        $.messager.alert("操作提示", "请选择要删除的部门","error",function () {
+                            $("#depName").focus();
+                        });
+                        return false;
+                    }
+                    $.post(
+                        '/department/delete?id='+depid,
+                        function (data) {
+                            if(data == 'parentNode'){
+                                $.messager.alert("操作提示", "不能删除该部门","error");
+                                return false;
+                            }
+                            if(data == "success"){
+                                $.messager.alert("操作提示", "删除成功！","info",function () {
+                                    window.location.href = "/department/list";
+                                });
+                            }else{
+                                $.messager.alert("操作提示", "删除失败！","error");
+                            }
+                        }
+                    )
+                }
+            });
+        }
+
+        function edit(id) {
+            $.get(
+                "/department/findById?id="+id,
+                function (data) {
+                    $("#depid").val(data.departmentId);
+                    $("#depName").val(data.departmentName);
+                    $("#parentId").val(data.parentId);
+                    $("#chairman").val(data.chairman);
+                    $("#remark").val(data.remark);
+                },
+                "json"
+            );
+        }
+
+        function add() {
+            $("#depid").val('');
+            $("#depName").val('');
+            $("#parentId").val('');
+            $("#chairman").val('');
+            $("#remark").val('');
+        }
+
+        function save() {
+            if ($("#depName").val() == "") {
+                $.messager.alert("操作提示", "请输入部门名称","error",function () {
+                    $("#depName").focus();
+                });
+                return false;
+            }
+
+            if ($("#parentId").val() == "") {
+                $.messager.alert("操作提示", "请输入父部门名称","error",function () {
+                    $("#parentId").focus();
+                });
+                return false;
+            }
+
+            $.post(
+                "/department/save",
+                {
+                    "departmentId": $("#depid").val(),
+                    "departmentName": $("#depName").val(),
+                    "parentId": $("#parentId").val(),
+                    "chairman": $("#chairman").val(),
+                    "remark": $("#remark").val()
+                },
+                function (data) {
+                    if(data == 'success'){
+                        $.messager.alert("操作提示", "保存成功！","info",function () {
+                            window.location.href = "/department/list";
+                        });
+                    }else{
+                        $.messager.alert("操作提示", "保存失败！","error");
+                    }
+                }
+            )
+        }
+
+    </script>
+</head>
+<body>
+<div class="easyui-panel" style="padding:5px;height: 280px;">
+    <ul id="tt1" class="easyui-tree" data-options="animate:true,dnd:true" style="height:250px">
+        <li th:if="${dep.parentId == 0}" th:each="dep:${depList}" data-options="state:'open'">
+            <span><a href="javascript:void(0)" th:onclick="'edit('+${dep.departmentId}+')'" th:id="${dep.departmentId}" th:text="${dep.departmentName}"></a></span>
+            <ul th:each="dep2:${depList}" th:if="${dep.departmentId == dep2.parentId}">
+                <li data-options="state:'open'">
+                    <span><a href="javascript:void(0)" th:onclick="'edit('+${dep2.departmentId}+')'" th:id="${dep2.departmentId}" th:text="${dep2.departmentName}"></a></span>
+                    <ul th:each="dep3:${depList}" th:if="${dep2.departmentId == dep3.parentId}">
+                        <li data-options="state:'open'">
+                            <span><a href="javascript:void(0)" th:onclick="'edit('+${dep3.departmentId}+')'" th:id="${dep3.departmentId}" th:text="${dep3.departmentName}"></a></span>
+                            <ul th:each="dep4:${depList}" th:if="${dep3.departmentId == dep4.parentId}">
+                                <li data-options="state:'open'">
+                                    <span><a href="javascript:void(0)" th:onclick="'edit('+${dep4.departmentId}+')'" th:id="${dep4.departmentId}" th:text="${dep4.departmentName}"></a></span>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+<div id="tt" class="easyui-tabs" style="height:320px">
+    <div title="部门管理" data-options="closable:false,cache:false" style="padding:0px;">
+        <div class="newtitle">
+            <th>
+                <a class="easyui-linkbutton" plain="true" icon="icon-add" href="javascript:void(0);"
+                   onclick="add();">新增</a>
+                <a class="easyui-linkbutton" plain="true" icon="icon-save" href="javascript:void(0);"
+                   onclick="save();">保存</a>
+                <a class="easyui-linkbutton" plain="true" icon="icon-cut" href="javascript:void(0);"
+                   onclick="del();">删除</a>
+            </th>
+        </div>
+        <form name="form1" enctype="multipart/form-data" method="post">
+            <input type="hidden" id="depid" name="depid"/>
+            <table width="100%" align="center" >
+                <tr style="height: 40px">
+                    <td align="right">部门名称：</td>
+                    <td>
+                        <input id="depName" name="depName"
+                               data-options="prompt:'请输入部门名称',validType:'text'" style="width:220px;">
+                    </td>
+                </tr>
+                <tr style="height: 40px">
+                    <td align="right">上级部门名称：</td>
+                    <td>
+                        <select name="parentId" id="parentId"
+                                style="width:220px;">
+                            <option class="depOption" th:each="dep:${depList}" th:value="${dep.departmentId}" th:text="${dep.departmentName}"></option>
+                        </select>
+                    </td>
+                </tr>
+                <tr style="height: 40px">
+                    <td align="right">部门负责人：</td>
+                    <td>
+                        <select name="chairman" id="chairman"
+                                style="width:220px;">
+                            <option th:each="emp:${empList}" th:id="${emp.employeeId}" th:text="${emp.employeeName}"></option>
+                        </select>
+                    </td>
+                </tr>
+                <tr style="height: 40px">
+                    <td align="right">备注：</td>
+                    <td colspan="5">
+                        <textarea id="remark" name="remark"
+                                  style="width:50%; height:80px;" ></textarea>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+</body>
+</html>

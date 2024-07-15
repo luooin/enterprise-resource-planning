@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>编辑权限</title>
+
+</head>
+<body>
+<div class="easyui-panel" style="padding:5px;height: 300px;">
+    <ul id="employee" class="easyui-tree" checkbox="true">
+        <li th:each="department:${departmentList}" th:if="${department.department == null}">
+            <span th:text="${department.departmentName}"></span>
+            <ul>
+                <li th:each="department2:${departmentList}" th:if="${department2.parentId == department.departmentId}">
+                    <span th:text="${department2.departmentName}"></span>
+                    <ul>
+                        <li th:each="department3:${departmentList}" th:if="${department3.parentId == department2.departmentId}">
+                            <span th:text="${department3.departmentName}"></span>
+                            <ul>
+                                <li th:each="employee:${department3.employees}" th:id="${employee.employeeId}" th:if="${employee.have == true}" data-options="checked:'true'">
+                                    <span th:text="${employee.employeeName}"></span>
+                                </li>
+                                <li th:each="employee:${department3.employees}" th:id="${employee.employeeId}" th:if="${employee.have == false}">
+                                    <span th:text="${employee.employeeName}"></span>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+<input type="hidden" id="roleId" th:value="${roleId}"/>
+<a href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-add'"
+   onclick="updateEmployee()">保存</a>
+</body>
+</html>

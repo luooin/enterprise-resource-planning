@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>编辑权限</title>
+
+</head>
+<body>
+<div class="easyui-panel" style="padding:5px;height: 300px;">
+    <ul id="module" class="easyui-tree" checkbox="true">
+        <li th:each="authority1:${authorityList}" th:id="${authority1.authorityId}" th:if="${authority1.authority == null}">
+            <span th:id="${authority1.authorityId}" th:text="${authority1.authorityName}"></span>
+            <ul>
+                <li th:each="authority2:${authorityList}" th:id="${authority2.authorityId}" th:if="${authority2.root == authority1.authorityId}">
+                    <span th:id="${authority2.authorityId}" th:text="${authority2.authorityName}"></span>
+                    <ul>
+                        <li th:each="authority3:${authorityList}" th:id="${authority3.authorityId}" th:if="${authority3.root == authority2.authorityId && authority3.have == true}" data-options="checked:'true'">
+                            <span th:id="${authority3.authorityId}" th:text="${authority3.authorityName}"></span>
+                        </li>
+                        <li th:each="authority3:${authorityList}" th:id="${authority3.authorityId}" th:if="${authority3.root == authority2.authorityId && authority3.have == false}">
+                            <span th:id="${authority3.authorityId}" th:text="${authority3.authorityName}"></span>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+<input type="hidden" id="roleId" th:value="${roleId}"/>
+<a href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-add'"
+   onclick="updateAuthority()">保存</a>
+
+</body>
+</html>

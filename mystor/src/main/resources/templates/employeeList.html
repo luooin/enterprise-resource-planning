@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>用户资料</title>
+    <style>
+        body{
+            width: 99%;
+        }
+        .newtitle {
+            PADDING-LEFT: 15px;
+            BACKGROUND: url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAARCAAdAAEDAREAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAABggK/8QAHxAAAQMDBQAAAAAAAAAAAAAAAQAUUgIXkVaBpdXw/8QAFgEBAQEAAAAAAAAAAAAAAAAABQMG/8QAIhEAAQIEBwEAAAAAAAAAAAAAAAETAmGR8BEVVHGBk+PR/9oADAMBAAIRAxEAPwDfW6Eh7ZWalFfBF2cN8hV6ZHCUZhvH6HPbUUHvTI4S7O1VC3VnUmy9dWm+YHVLXZCmpTo9TJ58umXv8j//2Q==');
+            PADDING-BOTTOM: 4px;
+            BORDER-LEFT: #c0dcf2 1px solid;
+        }
+    </style>
+    <th:block th:include="common.html :: source"></th:block>
+    <script type="text/javascript">
+
+        $(function () {
+            var pager = $(".easyui-datagrid").datagrid('getPager');
+            $(pager).pagination({
+                total:parseInt($("#total").val()),
+                pageSize:parseInt($("#size").val()),
+                pageNumber:parseInt($("#current").val()),
+                afterPageText: '页，共{pages}页',
+                pageList: [1, 5, 10, 30, 50, 100],
+                onBeforeRefresh: function (current, size) {
+                    let departmentId = $("#departmentId").val();
+                    let employeeName = $("#employeeName").val();
+                    let phone = $("#phone").val();
+                    let status = $("#status").val();
+                    location.href = "/employee/list?current=" + current + "&size=" + size + "&departmentId=" + departmentId + "&employeeName=" + employeeName + "&phone=" + phone + "&status=" + status;
+                },
+                onSelectPage: function (current, size) {
+                    let departmentId = $("#departmentId").val();
+                    let employeeName = $("#employeeName").val();
+                    let phone = $("#phone").val();
+                    let status = $("#status").val();
+                    location.href = "/employee/list?current=" + current + "&size=" + size + "&departmentId=" + departmentId + "&employeeName=" + employeeName + "&phone=" + phone + "&status=" + status;
+                }
+            });
+        });
+
+        function del(id) {
+            $.messager.confirm('提示','确定删除？',function(res){
+                if(res){
+                    $.post(
+                        "/employee/delete?id="+id,
+                        function (data) {
+                            if(data == "success"){
+                                $.messager.alert("操作提示", "删除成功！","info",function () {
+                                    window.location.href = "/employee/list";
+                                });
+                            }else{
+                                $.messager.alert("操作提示", "删除失败！","error");
+                            }
+                        }
+                    );
+                }
+            })
+        }
+
+        function resetPassword(id) {
+            $.messager.confirm('提示','确认将员工密码重置为123456？',function(res){
+                if(res){
+                    $.post(
+                        "/employee/resetPassword?id=" + id,
+                        function (data) {
+                            if(data == "success"){
+                                $.messager.alert("操作提示", "密码重置成功！","info",function () {
+                                    window.location.href = "/employee/list";
+                                });
+                            }else{
+                                $.messager.alert("操作提示", "密码重置失败！","error");
+                            }
+                        }
+                    );
+                }
+            })
+        }
+
+        function edit(id) {
+            window.location.href = "/employee/findById?id=" + id;
+        }
+
+        function add() {
+            window.location.href = "/employee/add";
+        }
+
+        function setStatus(status, id) {
+            var str = "";
+            if (status == 1) {
+                str = "启用";
+            } else {
+                str = "禁用";
+            }
+            $.messager.confirm('提示','是否将编号为'+id+'的员工状态设置为'+str+'？',function(res){
+                if(res){
+                    $.post(
+                        "/employee/setStatus?status=" + status + "&id=" + id,
+                        function (data) {
+                            if(data == "success"){
+                                $.messager.alert("操作提示", "状态设置成功！","info",function () {
+                                    window.location.href = "/employee/list";
+                                });
+                            }else{
+                                $.messager.alert("操作提示", "状态设置失败！","error");
+                            }
+                        }
+                    );
+                }
+            })
+        }
+
+        function employeeSearch() {
+            if($("#employeeName").val().length>10){
+                $.messager.alert("操作提示", "员工姓名长度过长","error",function () {
+                    $("#employeeName").focus();
+                });
+                return false;
+            }
+            if($("#phone").val().length>11){
+                $.messager.alert("操作提示", "手机号码长度过长","error",function () {
+                    $("#employeeName").focus();
+                });
+                return false;
+            }
+            document.forms[0].submit();
+        }
+    </script>
+</head>
+<body>
+<div id="tb">
+    <input type="hidden" id="total" th:value="${page.total}"/>
+    <input type="hidden" id="size" th:value="${page.size}"/>
+    <input type="hidden" id="current" th:value="${page.current}"/>
+    <a class="easyui-linkbutton" plain="true" icon="icon-add" href="javascript:void(0);" onclick="add()">新增员工</a>
+    <form id="form1" modelAttribute="enrollment" action="/employee/list" method="post">
+        部门名称:
+        <select  id="departmentId" name="departmentId"  style="width:120px;" >
+            <option value="">未选择</option>
+            <option th:each="department:${departmentList}" th:value="${department.departmentId}"
+                    th:text="${department.departmentName}" th:selected="${employee.departmentId == department.departmentId}"></option>
+        </select>
+        员工姓名: <input class="easyui-textbox" th:value="${employee.employeeName}" id="employeeName" name="employeeName" style="width:110px;">
+        手机号码: <input class="easyui-textbox" th:value="${employee.phone}" id="phone" name="phone" style="width:110px;">
+        状态:
+        <select class="easyui-combobox" panelHeight="auto" id="status" name="status" style="width:120px;" editable="false">
+            <option value="">未选择</option>
+            <option value="1" th:selected="${employee.status == 1}">启用</option>
+            <option value="0" th:selected="${employee.status == 0}">禁用</option>
+        </select>
+        <a href="javascript:void(0);" class="easyui-linkbutton"  plain="true" onclick="employeeSearch();" iconCls="icon-search">搜索</a>
+    </form>
+</div>
+<table class="easyui-datagrid" pagination="true" style="height:500px;width: auto;" fitColumns="true" singleSelect="true">
+    <thead>
+    <tr>
+        <th width="55" align="center" field="empId">员工编号</th>
+        <th width="55" align="center" field="empName">员工姓名</th>
+        <th width="55" align="center" field="depId">部门</th>
+        <th width="40" align="center" field="sex">性别</th>
+        <th width="80" align="center" field="phone">手机号码</th>
+        <th width="110" align="center" field="address">家庭地址</th>
+        <th width="40" align="center" field="status">状态</th>
+        <th width="60" align="center" field="szstatus">设置状态</th>
+        <th width="80" align="center" field="szpassword">初始密码</th>
+        <th width="110" align="center" field="opt">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="employee:${page.data}">
+        <td width="100" th:text="${employee.employeeId}"></td>
+        <td width="100" th:text="${employee.employeeName}"></td>
+        <td width="100" th:text="${employee.departmentName}"></td>
+        <td width="100" th:text="${employee.sex}"></td>
+        <td width="100" th:text="${employee.phone}"></td>
+        <td width="100" th:text="${employee.address}"></td>
+        <td width="100" th:if="${employee.status == 0}">禁用</td>
+        <td width="100" th:if="${employee.status == 1}">启用</td>
+        <td width="100" th:if="${employee.status == 0}"><a class="easyui-linkbutton" icon="icon-tip"  plain="true" href="javascript:void(0);"  th:onclick="'setStatus(1,'+${employee.employeeId}+');'">启用</a></td>
+        <td width="100" th:if="${employee.status == 1}"><a class="easyui-linkbutton" icon="icon-tip"  plain="true" href="javascript:void(0);" th:onclick="'setStatus(0,'+${employee.employeeId}+');'">禁用</a></td>
+        <td width="100">
+            <a class="easyui-linkbutton" icon="icon-reload" plain="true" href="javascript:void(0);" th:onclick="'resetPassword('+${employee.employeeId}+')'">重置密码</a>
+        </td>
+        <td width="100">
+            <a href="javascript:void(0);" class="easyui-linkbutton" plain="true" icon="icon-remove"
+               th:onclick="'del('+${employee.employeeId}+');'"> 删除</a>
+            <a href='javascript:void(0);' class="easyui-linkbutton" plain="true" icon="icon-edit"
+               th:onclick="'edit('+${employee.employeeId}+');'">编辑</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

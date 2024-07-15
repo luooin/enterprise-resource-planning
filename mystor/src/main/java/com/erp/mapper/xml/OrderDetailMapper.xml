@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.erp.mapper.OrderDetailMapper">
+    <delete id="batchDelete">
+        delete from order_detail
+        <where>
+            <foreach collection="orderNos" open="order_no in (" close=")" item="orderNo" separator=",">
+                #{orderNo}
+            </foreach>
+        </where>
+    </delete>
+
+    <select id="checkBatchNo" resultType="int">
+        select count(*) from order_detail
+        <where>
+            <foreach collection="batchNoList" open="batch_no in (" close=")" item="batchNo" separator=",">
+                #{batchNo}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="orderDetailList" resultType="com.erp.entity.OrderDetail">
+        select od.order_id,od.batch_no,od.order_count,od.material_id,od.material_code,od.material_name,od.style,od.unit_name from orders o,order_detail od where o.order_no = od.order_no and od.order_count > 0 and o.order_type = 1 and o.invalid=1 and o.status=0
+    </select>
+
+    <select id="saleReturnOrdersDetailList" resultType="com.erp.entity.OrderDetail">
+        select od.order_no,od.order_id,od.batch_no,od.order_count,od.material_id,od.material_code,od.material_name,od.style,od.unit_name from orders o,order_detail od where o.order_no = od.order_no and od.order_count > 0 and o.order_type = 3 and o.invalid = 1 and o.status = 0
+    </select>
+
+    <update id="updateOrderCount">
+        update order_detail od,orders o set order_count = #{param1} where o.order_no = od.order_no and od.batch_no = #{param2} and o.order_type = #{param3}
+    </update>
+
+    <select id="getOrderCount" resultType="java.math.BigDecimal">
+        select od.order_count from orders o,order_detail od where o.order_no = od.order_no and od.batch_no = #{param1} and o.order_type = #{param2}
+    </select>
+
+    <select id="storageReportVOList" resultType="StorageReportVO">
+        select storage_name,material_code,material_name,style,batch_no,unit_name,order_id,order_count,order_date from order_detail od,orders o
+        <where>
+            od.order_no = o.order_no
+            <if test="param3.storageId != null and param3.storageId != ''">
+                and storage_id = #{param3.storageId}
+            </if>
+            <if test="param3.materialName != null and param3.materialName != ''">
+                and material_name like concat('%',#{param3.materialName},'%')
+            </if>
+            <if test="param3.orderDate1 != null and param3.orderDate1 != '' and param3.orderDate2 != null and param3.orderDate2 != ''">
+                and order_date between #{param3.orderDate1} and #{param3.orderDate2}
+            </if>
+        </where>
+        limit #{param1},#{param2}
+    </select>
+
+
+    <select id="storageReportCount" resultType="java.lang.Long">
+        select count(*) from order_detail od,orders o
+        <where>
+            od.order_no = o.order_no
+            <if test="storageId != null and storageId != ''">
+                and storage_id = #{storageId}
+            </if>
+            <if test="materialName != null and materialName != ''">
+                and material_name like concat('%',#{materialName},'%')
+            </if>
+            <if test="orderDate1 != null and orderDate1 != '' and orderDate2 != null and orderDate2 != ''">
+                and order_date between #{orderDate1} and #{orderDate2}
+            </if>
+        </where>
+    </select>
+
+    <select id="storageReportVOExportList" resultType="StorageReportVO">
+        select storage_name,material_code,material_name,style,batch_no,unit_name,order_id,order_count,order_date from order_detail od,orders o where od.order_no = o.order_no
+    </select>
+
+</mapper>

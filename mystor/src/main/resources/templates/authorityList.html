@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>权限管理</title>
+    <th:block th:include="common.html :: source"></th:block>
+    <script type="text/javascript">
+        $(function () {
+            var pager = $(".easyui-datagrid").datagrid('getPager');
+            $(pager).pagination({
+                total:parseInt($("#total").val()),
+                pageSize:parseInt($("#size").val()),
+                pageNumber:parseInt($("#current").val()),
+                afterPageText: '页，共{pages}页',
+                pageList: [1, 5, 10, 20, 30, 100],
+                //刷新方法
+                onBeforeRefresh: function (current, size) {
+                    location.href = "/role/list?current=" + current + "&size=" + size;
+                },
+                onSelectPage: function (current, size) {
+                    location.href = "/role/list?current=" + current + "&size=" + size;
+                }
+            });
+        });
+
+        function click(value, rec) {
+            $("#roleId").val(rec.roleId);
+            $("#roleName").val(rec.roleName);
+        }
+
+        function del(id) {
+            $.messager.confirm('提示','确定删除？',function(res){
+                if(res){
+                    $.post(
+                        "/role/delete?id="+id,
+                        function (data) {
+                            if(data == "success"){
+                                $.messager.alert("操作提示", "删除成功！","info",function () {
+                                    window.location.href = "/role/list";
+                                });
+                            }else{
+                                $.messager.alert("操作提示", "删除失败！","error");
+                            }
+                        }
+                    );
+                }
+            })
+        }
+
+        function save() {
+            if($("#roleName").val() == ""){
+                $.messager.alert("操作提示", "角色名称不能为空","error");
+                return false;
+            }
+            $.post(
+                '/role/save?roleId='+$("#roleId").val()+'&roleName='+$("#roleName").val(),
+                function (data) {
+                    if(data == "success"){
+                        $.messager.alert("操作提示", "角色保存成功！","info",function () {
+                            window.location.href = "/role/list";
+                        });
+                    }else{
+                        $.messager.alert("操作提示", "角色保存失败！","error");
+                    }
+                }
+            );
+        }
+
+        function authorityEdit(id,name) {
+            $("#authorityEdit").window(
+                {
+                    href: '/authority/list?id='+id
+                });
+            $('#authorityEdit').window('refresh');
+            $('#authorityEdit').window('open');
+        }
+
+        function employeeAuthority(id) {
+            $("#employeeAuthority").window(
+                {
+                    href: '/authority/employeeAuthority?roleId=' + id,
+                });
+            $('#employeeAuthority').window('refresh');
+            $('#employeeAuthority').window('open');
+        }
+
+        function updateAuthority() {
+            let roleId = $("#roleId").val()
+            var nodes = $("#module").tree("getChecked");
+            var str = '';
+            for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].id != undefined) {
+                    if (str != '') str += ',';
+                    str += nodes[i].id;
+                }
+            }
+            $.post(
+                "/authority/roleAuthority?roleId="+roleId+"&authorityIdArr="+str,
+                function (data) {
+                    if(data == "success"){
+                        $.messager.alert("操作提示", "权限编辑成功！","info",function () {
+                            $('#authorityEdit').window('refresh');
+                        });
+                    }else{
+                        $.messager.alert("操作提示", "权限编辑失败！","error");
+                    }
+                }
+            );
+        }
+
+        function updateEmployee() {
+            let roleId = $("#roleId").val()
+            var nodes = $("#employee").tree("getChecked");
+            var str = '';
+            for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].id != undefined) {
+                    if (str != '') str += ',';
+                    str += nodes[i].id;
+                }
+            }
+            $.post(
+                "/authority/employeeAuthority?roleId="+roleId+"&employeeIdArr="+str,
+                function (data) {
+                    if(data == "success"){
+                        $.messager.alert("操作提示", "用户授权成功！","info",function () {
+                            $('#employeeAuthority').window('refresh');
+                        });
+                    }else{
+                        $.messager.alert("操作提示", "用户授权失败！","error");
+                    }
+                }
+            );
+        }
+
+        function add() {
+            $("#roleId").val('');
+            $("#roleName").val('');
+        }
+    </script>
+</head>
+<body>
+<input type="hidden" id="current" th:value="${page.current}"/>
+<input type="hidden" id="size" th:value="${page.size}"/>
+<input type="hidden" id="total" th:value="${page.total}"/>
+<table class="easyui-datagrid" pagination="true" style="height:340px" fitColumns="true" singleSelect="true"
+       data-options="onClickRow:click">
+    <thead>
+    <tr>
+        <th align="center" width="100" field="roleId">编号</th>
+        <th align="center" width="200" field="roleName">角色名称</th>
+        <th align="center" width="400" field="opt">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="role:${page.data}">
+        <td th:text="${role.roleId}"></td>
+        <td th:text="${role.roleName}"></td>
+        <td>
+            <a href="javascript:void(0);" class="easyui-linkbutton button-line-blue button-xs" th:onclick="'authorityEdit('+${role.roleId}+')'"> 编辑权限</a>
+            <a href="javascript:void(0);" class="easyui-linkbutton button-line-blue button-xs" th:onclick="'employeeAuthority('+${role.roleId}+')'">用户授权</a>
+            <a href="javascript:void(0);" class="easyui-linkbutton button-line-red button-xs" th:onclick="'del('+${role.roleId}+')'"> 删除</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<div id="tab-tools">
+    <a href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-add'"
+       onclick="add()">添加</a>
+    <a href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-save'"
+       onclick="save()">保存</a>
+</div>
+<div id="tt" class="easyui-tabs" style="height:220px;" data-options="tools:'#tab-tools'">
+    <div title="角色设置" data-options="closable:false,cache:false" style="padding:0px;">
+        <form method="post" id="characterForm" name="characterForm" style="margin-left: 150px;">
+            <input type="hidden" id="roleId" name="roleId"/>
+            <div style="margin-bottom:20px">
+                <label class="label-top">角色名称:</label>
+                <br/>
+                <input class="easyui-textbox" id="roleName"
+                       name="roleName" style="width:80%;">
+            </div>
+        </form>
+    </div>
+</div>
+<div class="easyui-window" title="编辑权限" id="authorityEdit" modal="true" style="width: 600px; height: 380px;" mode="true"
+     closed="true">
+</div>
+<div class="easyui-window" title="用户授权" id="employeeAuthority" modal="true" style="width: 600px; height: 380px;" mode="true"
+     closed="true">
+</div>
+</body>
+</html>

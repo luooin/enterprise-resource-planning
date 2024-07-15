@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.erp.mapper.RoleAuthorityMapper">
+
+    <select id="getAllRoleAuthorityByRoleId" resultType="java.util.Map">
+        select
+            ra.role_authority_id as id,
+            a.authority_name as name
+        from
+            role_authority ra,
+            authority a
+        where
+            ra.authority_id = a.authority_id
+            and ra.role_id = #{roleId}
+    </select>
+
+</mapper>

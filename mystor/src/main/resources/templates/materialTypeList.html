@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>物料类别管理</title>
+    <style>
+        .newtitle {
+            PADDING-LEFT: 15px;
+            BACKGROUND: url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAARCAAdAAEDAREAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAABggK/8QAHxAAAQMDBQAAAAAAAAAAAAAAAQAUUgIXkVaBpdXw/8QAFgEBAQEAAAAAAAAAAAAAAAAABQMG/8QAIhEAAQIEBwEAAAAAAAAAAAAAAAETAmGR8BEVVHGBk+PR/9oADAMBAAIRAxEAPwDfW6Eh7ZWalFfBF2cN8hV6ZHCUZhvH6HPbUUHvTI4S7O1VC3VnUmy9dWm+YHVLXZCmpTo9TJ58umXv8j//2Q==');
+            PADDING-BOTTOM: 4px;
+            BORDER-LEFT: #c0dcf2 1px solid;
+        }
+    </style>
+    <th:block th:include="common.html :: source"></th:block>
+    <script type="text/javascript">
+        $(function () {
+            var pager = $(".easyui-datagrid").datagrid('getPager');
+            $(pager).pagination({
+                total:parseInt($("#total").val()),
+                pageSize:parseInt($("#size").val()),
+                pageNumber:parseInt($("#current").val()),
+                afterPageText: '页，共{pages}页',
+                pageList: [1, 5, 10, 20, 30, 50],
+                //刷新方法
+                onBeforeRefresh: function (current, size) {
+                    location.href = "/materialType/list?current=" + current + "&size=" + size;
+                },
+                onSelectPage: function (current, size) {
+                    location.href = "/materialType/list?current=" + current + "&size=" + size;
+                }
+            });
+        });
+
+        function click(value, rec) {
+            $("#materialTypeId").val(rec.materialTypeId);
+            $("#materialTypeCode").val(rec.materialTypeCode);
+            $("#materialTypeName").val(rec.materialTypeName);
+            $("#formula").val(rec.formula);
+        }
+
+        function save() {
+            if($("#materialTypeCode").val()==""){
+                $.messager.alert("操作提示", "请输入物料类别代码","error",function () {
+                    $("#materialTypeCode").focus();
+                });
+                return false;
+            }
+            if($("#materialTypeName").val()==""){
+                $.messager.alert("操作提示", "请输入物料类别名称","error",function () {
+                    $("#materialTypeName").focus();
+                });
+                return false;
+            }
+
+            $.post(
+                "/materialType/save",
+                {
+                    "materialTypeId": $("#materialTypeId").val(),
+                    "materialTypeCode": $("#materialTypeCode").val(),
+                    "materialTypeName": $("#materialTypeName").val(),
+                    "formula":$("#formula").val()
+                },
+                function (data) {
+                    if(data == "success"){
+                        $.messager.alert("操作提示", "保存成功！","info",function () {
+                            window.location.href = "/materialType/list";
+                        });
+                    }else{
+                        $.messager.alert("操作提示", "物料类别代码【"+$("#materialTypeCode").val()+"】已存在，请重新输入！","error",function () {
+                            $("#materialTypeCode").focus();
+                        });
+                        return false;
+                    }
+                }
+            )
+        }
+
+        function del(id){
+
+            $.messager.confirm('提示','确定删除？',function(res){
+                if(res){
+                    $.post(
+                        "/materialType/delete?id="+id,
+                        function (data) {
+                            if(data == "success"){
+                                $.messager.alert("操作提示", "删除成功！","info",function () {
+                                    window.location.href = "/materialType/list";
+                                });
+                            }else{
+                                $.messager.alert("操作提示", "删除失败！","error");
+                            }
+                        }
+                    );
+                }
+            })
+        }
+
+        function reset() {
+            $("#materialTypeId").val('');
+            $("#materialTypeCode").val('');
+            $("#materialTypeName").val('');
+            $("#formula").val('');
+        }
+
+    </script>
+</head>
+<body>
+<input type="hidden" id="current" th:value="${page.current}"/>
+<input type="hidden" id="size" th:value="${page.size}"/>
+<input type="hidden" id="total" th:value="${page.total}"/>
+<table class="easyui-datagrid" pagination="true" fitColumns="true" style="height:400px" singleSelect="true"
+       data-options="onClickRow:click">
+    <thead>
+    <tr>
+        <th align="center" width="100" field="materialTypeId">编号</th>
+        <th align="center" width="200" field="materialTypeCode">物料类别代码</th>
+        <th align="center" width="200" field="materialTypeName">物料类别名称</th>
+        <th align="center" width="200" field="formula">批号规则</th>
+        <th align="center" width="200" field="opt">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="materialType:${page.data}">
+        <td th:text="${materialType.materialTypeId}"></td>
+        <td th:text="${materialType.materialTypeCode}"></td>
+        <td th:text="${materialType.materialTypeName}"></td>
+        <td th:text="${materialType.formula}"></td>
+        <td>
+            <a href="javascript:void(0)" class="easyui-linkbutton" plain="true" icon="icon-remove"
+               th:onclick="'del('+${materialType.materialTypeId}+')'"> 删除</a>
+            <a href='javascript:void(0);' class="easyui-linkbutton" plain="true" icon="icon-edit" onclick='click()'>编辑</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<div id="tt" class="easyui-tabs" style="height:150px">
+    <div title="物料类别管理" data-options="closable:false,cache:false" style="padding:0px;">
+        <div class="newtitle">
+            <th>
+                <a class="easyui-linkbutton " href="javascript:void(0);" plain="true" icon="icon-add" onclick="reset()">新增</a>
+                <a class="easyui-linkbutton" plain="true" icon="icon-save" href="javascript:void(0);"
+                   onclick="save()">保存</a>
+            </th>
+        </div>
+        <form name="form1" enctype="multipart/form-data" method="post">
+            <hidden id="materialTypeId" name="materialTypeId"></hidden>
+            <table width="100%" align="center" style="margin-top: 20px;">
+                <tr>
+                    <td align="right">物料类别代码：</td>
+                    <td>
+                        <input class="easyui-textbox" id="materialTypeCode" name="materialTypeCode"
+                               data-options="prompt:'请输入物料类别代码',validType:'text'"><font color="red">必须唯一</font>
+                    </td>
+                    <td align="right">物料类别名称：</td>
+                    <td>
+                        <input class="easyui-textbox" id="materialTypeName" name="materialTypeName"
+                               data-options="prompt:'请输入物料类别名称',validType:'text'">
+                    </td>
+                    <td align="right">批号规则：</td>
+                    <td>
+                        <input class="easyui-textbox" id="formula" name="formula"
+                               data-options="prompt:'请输入批号规则',validType:'text'">
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+</body>
+</html>
